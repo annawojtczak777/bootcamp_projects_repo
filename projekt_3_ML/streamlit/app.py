@@ -30,7 +30,7 @@ st.write('---')
 
 st.subheader('Dataset')
 st.markdown('The dataset compiles the list of NASA certified asteroids that are classified as the nearest earth object.')
-df = pd.read_csv("neo_v2.csv")
+df = pd.read_csv("/Users/katarzyna/Desktop/DataScience/jdszr10-TheChaosMakers/projekt_3_ML/streamlit/neo_v2.csv")
 st.write(df.head())
 
 exploration()

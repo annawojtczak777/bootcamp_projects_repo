@@ -17,10 +17,10 @@ from sklearn.preprocessing import StandardScaler
 import time
 
 # read original dataset
-df=pd.read_csv("neo_v2.csv")
+df=pd.read_csv('/Users/katarzyna/Desktop/DataScience/jdszr10-TheChaosMakers/projekt_3_ML/streamlit/neo_v2.csv')
 
 # selecting features and target data
-df=df.drop(['id','name','orbiting_body','sentry_object'], axis=1)
+df=df.drop(['id','name','orbiting_body','sentry_object', 'est_diameter_min'], axis=1)
 df=pd.get_dummies(df, columns=['hazardous'], drop_first= True)
 
 cols=['est_diameter_max','relative_velocity','miss_distance','absolute_magnitude']
@@ -33,12 +33,19 @@ def exploration():
     st.pyplot(fig)
 
     st.subheader('Histplot')
-    feature_cols = list(df.columns)[1:-1]
+    feature_cols = list(df[cols])
     target_var = df.columns[-1]
     fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(15,10))
     for i, col in enumerate(feature_cols):
-        sns.histplot(data = df, x = col, ax = axes[i//2, i%2], hue = target_var, fill = True, kde=True, palette='coolwarm')
+        if col == 'est_diameter_max':
+            sns.histplot(data=df, x=col, ax=axes[i//2, i%2], hue=target_var, fill=True, kde=True, palette='coolwarm')
+            lower_limit = 0
+            upper_limit = 1
+            axes[i//2, i%2].set_xlim(lower_limit, upper_limit)
+        else:
+            sns.histplot(data=df, x=col, ax=axes[i//2, i%2], hue=target_var, fill=True, kde=True, palette='coolwarm')
     st.pyplot(fig)
+
 
 # split data into train and test sets
 # 70% training and 30% test
@@ -144,7 +151,7 @@ def predict_test():
     st.table(clsf_report_test)
     
     st.markdown('Feature Importance')
-    feature_imp = pd.Series(rf_model.feature_importances_, index=df.columns[1:-1]).sort_values(ascending=False)
+    feature_imp = pd.Series(rf_model.feature_importances_, index=list(df[cols])).sort_values(ascending=False)
     fig, ax = plt.subplots(figsize=(12,5))
     ax.barh(feature_imp.index, feature_imp.values)
     ax.invert_yaxis()  # labels read top-to-bottom
