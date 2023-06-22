@@ -16,7 +16,6 @@ st.image(
         )
 
 st.header('Intro')
-
 st.markdown('''Near Earth Objects (NEOs) are asteroids and comets which have orbits passing near the Earth.
 They range in size from less than one to tens of kilometres across. 
 
@@ -26,19 +25,37 @@ Despite the large number of them, the chance of a NEO striking the Earth is slim
 Although rare, NEOs are still a future threat,and the consequences of a bigger object hitting us could potentially be catastrophic for life on Earth.
 Keeping track of Near Earth Objects and the likelihood of them making impact with Earth is therefore very important.''')
 
-st.write('---')
+url = 'https://www.rmg.co.uk/stories/topics/near-earth-objects-neos-near-misses'
+st.write("Source : [Royal Museums Greenwich](%s)" % url)
 
-st.subheader('Dataset')
+
+
+st.header('Dataset')
 st.markdown('The dataset compiles the list of NASA certified asteroids that are classified as the nearest earth object.')
-df = pd.read_csv("neo_v2.csv")
+url2 = 'https://www.kaggle.com/datasets/sameepvani/nasa-nearest-earth-objects'
+st.write("Source : [Kaggle](%s)" % url2)
+
+df = pd.read_csv(r"C:\Users\toawe\OneDrive\Pulpit\jdszr10-TheChaosMakers\projekt_3_ML\streamlit\clean.csv")
 st.write(df.head())
 
+st.write('Number of observations: 90836')
+
+st.write('est_diameter_max - Maximum Estimated Diameter in Kilometres')
+st.write('relative_velocity - Velocity Relative to Earth')
+st.write('miss_distance - Distance in Kilometres missed')
+st.write('absolute_magnitude - Describes intrinsic luminosity')
+st.write('hazardous_True - Boolean feature that shows whether asteroid is harmful or not')
+
+st.header('Data Exploration')
 exploration()
 
+st.header('Models estimation results')
 estimation_models()
 
+st.header('Evaluating the performance of the best model')
 predict_test()
 
+st.markdown('ROC Curves and classification quality assessment')
 krzywa_ROC()
 
 

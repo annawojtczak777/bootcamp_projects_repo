@@ -17,11 +17,7 @@ from sklearn.preprocessing import StandardScaler
 import time
 
 # read original dataset
-df=pd.read_csv("neo_v2.csv")
-
-# selecting features and target data
-df=df.drop(['id','name','orbiting_body','sentry_object'], axis=1)
-df=pd.get_dummies(df, columns=['hazardous'], drop_first= True)
+df=pd.read_csv(r"C:\Users\toawe\OneDrive\Pulpit\jdszr10-TheChaosMakers\projekt_3_ML\streamlit\clean.csv")
 
 cols=['est_diameter_max','relative_velocity','miss_distance','absolute_magnitude']
 
@@ -33,11 +29,11 @@ def exploration():
     st.pyplot(fig)
 
     st.subheader('Histplot')
-    feature_cols = list(df.columns)[1:-1]
+    feature_cols = list(df.columns)[0:-1]
     target_var = df.columns[-1]
     fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(15,10))
     for i, col in enumerate(feature_cols):
-        sns.histplot(data = df, x = col, ax = axes[i//2, i%2], hue = target_var, fill = True, kde=True, palette='coolwarm')
+        sns.histplot(data = df, x = col, ax = axes[i//2, i%2], hue = target_var, fill = True, kde=True, palette='coolwarm',log_scale=True)
     st.pyplot(fig)
 
 # split data into train and test sets
@@ -63,9 +59,6 @@ elapsed_time = time.time() - start_time
 
 #models estimation
 def estimation_models():
-
-    st.subheader('Models estimation results')
-
     # logistic regresion models():
     model_lr = LogisticRegression(random_state=42).fit(X_train, y_train)
     y_pred_model_lr = model_lr.predict(X_test)
@@ -73,7 +66,7 @@ def estimation_models():
           'F1_score':round(f1_score(y_test,y_pred_model_lr),3),
           'Recall':round(recall_score(y_test,y_pred_model_lr),3),
           'Precision':round(precision_score(y_test,y_pred_model_lr),3)}
-    df_lr=pd.DataFrame(data=Scores_lr,index=['Logostic_Regresion'])
+    df_lr=pd.DataFrame(data=Scores_lr,index=['Logistic_Regresion'])
 
     # decision tree calssifier model
     tree_1 = DecisionTreeClassifier(random_state=42, max_depth=3,criterion='gini').fit(X_train, y_train) 
@@ -82,7 +75,7 @@ def estimation_models():
           'F1_score':round(f1_score(y_test,y_pred_tree),3),
           'Recall':round(recall_score(y_test,y_pred_tree),3),
           'Precision':round(precision_score(y_test,y_pred_tree),3)}
-    df_t=pd.DataFrame(data=Scores_t,index=['DecisionTreeClassifier'])
+    df_t=pd.DataFrame(data=Scores_t,index=['Decision_Tree_Classifier'])
 
     # random forest classifier model 
     rf_model=RandomForestClassifier(max_depth=5, 
@@ -95,7 +88,7 @@ def estimation_models():
                         'Recall':round(recall_score(y_test,pred_test),3),
                         'Precision':round(precision_score(y_test,pred_test),3),
                         'F1_score':round(f1_score(y_test,pred_test),3)}
-    df_rf=pd.DataFrame(data=scores_rf_model,index=['RandomForestClassifier'])
+    df_rf=pd.DataFrame(data=scores_rf_model,index=['Random_Forest_Classifier'])
 
 
     # xgb model
@@ -109,7 +102,7 @@ def estimation_models():
           'F1_score':round(f1_score(y_test, y_pred_xgb),3),
           'Recall':round(recall_score(y_test, y_pred_xgb),3),
           'Precision':round(precision_score(y_test, y_pred_xgb),3)}
-    df_xgb=pd.DataFrame(data=Scores_xgb,index=['XGBClassifier'])
+    df_xgb=pd.DataFrame(data=Scores_xgb,index=['XGB_Classifier'])
 
     # KNN model
     knn = KNeighborsClassifier(n_neighbors=28).fit(X_train, y_train)
@@ -118,22 +111,19 @@ def estimation_models():
           'F1_score':round(f1_score(y_test, y_pred_knn),3),
           'Recall':round(recall_score(y_test, y_pred_knn),3),
           'Precision':round(precision_score(y_test, y_pred_knn),3)}
-    df_KNN=pd.DataFrame(data=Scores_xgb,index=['KNN'])
+    df_KNN=pd.DataFrame(data=Scores_xgb,index=['KNN_Classifier'])
 
     result = pd.concat([df_lr,df_t,df_rf, df_xgb, df_KNN])
     st.table(result)
 
 
 # function predict on the test set and gets score
-
 def predict_test():
 
     pred_test = rf_model.predict(X_test)
-    pred_train = rf_model.predict(X_train) #predykcja na zbiorze trenigowym ???
+    pred_train = rf_model.predict(X_train) #predykcja na zbiorze trenigowym 
   
-    st.subheader('Evaluating the performance of the best model')
-
-    st.markdown(f'Training time: {elapsed_time:.3f} seconds')
+    st.markdown(f'Training time: {elapsed_time:.3f} seconds') #czas
     
     st.markdown('Classification report for train set')
     clsf_report_train = pd.DataFrame(classification_report(y_train,pred_train,output_dict=True))
@@ -144,7 +134,7 @@ def predict_test():
     st.table(clsf_report_test)
     
     st.markdown('Feature Importance')
-    feature_imp = pd.Series(rf_model.feature_importances_, index=df.columns[1:-1]).sort_values(ascending=False)
+    feature_imp = pd.Series(rf_model.feature_importances_, index=df.columns[0:-1]).sort_values(ascending=False)
     fig, ax = plt.subplots(figsize=(12,5))
     ax.barh(feature_imp.index, feature_imp.values)
     ax.invert_yaxis()  # labels read top-to-bottom
@@ -169,28 +159,35 @@ def predict_test():
     st.pyplot(fig)
 
 def krzywa_ROC():
-    st.subheader('Visualization of ROC Curve')
+    
     #sprawdzeie modelu pod kątem krzywej ROC (działa na prawdopodobienstwie (lub score)z modelu, a nie na wartosciach klas - tak jak classification_report)
     #zwsze robimy nie na predict tylko na predict_proba
 
     from sklearn.metrics import roc_auc_score, roc_curve
     pred_train_proba = rf_model.predict_proba(X_train)[:,1] #wyrzuci prawd. lub score przyporzadkowaia do jedynki lub zera
     pred_test_proba = rf_model.predict_proba(X_test)[:,1]
+
+    st.text('Wskaźnik AUC train: ')
+    st.text(roc_auc_score(y_train,pred_train_proba))
+    st.text('Wskaźnik AUC test: ')
+    st.text(roc_auc_score(y_test,pred_test_proba))
     
     roc_auc_score(y_train,pred_train_proba)
     roc_auc_score(y_test,pred_test_proba)
     #krzywa ROC zwraca 3 argumenty: false_positive_rate, true_positive_rate, i treshholds, dla których zostały wiliczone)
     
+    st.markdown('Visualization of ROC Curve')
     fpr_train, tpr_train, thresholds =roc_curve(y_train, pred_train_proba)
     fpr_test, tpr_test, thresholds_test =roc_curve(y_test, pred_test_proba)
     fig, ax = plt.subplots(figsize=(6,6))
     ax.plot(fpr_train,tpr_train, label='train')
     ax.plot(fpr_test,tpr_test,label='test')
     ax.plot(np.arange(0,1,0.01),np.arange(0,1,0.01),'--') #odnieisienie do modelu losowego
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
     plt.legend()
     st.pyplot(fig)
    
-
 
 # save the model to disk
 joblib.dump(rf_model, 'rf_model.sav')
