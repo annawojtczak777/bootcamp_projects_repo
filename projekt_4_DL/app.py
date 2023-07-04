@@ -63,7 +63,7 @@ labels = to_categorical(labels)  #one hot encoding
 x_train, x_test, y_train, y_test = train_test_split(images, labels, test_size=0.4, random_state=27)
 y_pred = model.predict(x_test)
 
-# Get the actual labels (instead of one-hot encoding) for y_test and y_pred
+
 y_test_labels = np.argmax(y_test, axis=1)
 y_pred_labels = np.argmax(y_pred, axis=1)
 
@@ -85,7 +85,7 @@ for i in range(0, 15, 3):  # Change the step size to adjust the number of images
         else:
             cols[j].markdown(f"True: {true_label}\nPredicted: {pred_label}")  # Text will be normal
 
-        cols[j].image(img, width=100)  # adjust width to your preference
+        cols[j].image(img, width=100)  
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
