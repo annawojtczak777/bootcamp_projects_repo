@@ -6,12 +6,22 @@ from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.utils import plot_model
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
+from tensorflow.python.keras.utils import layer_utils 
 import os
 import cv2
 import random
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+import tensorflow as tf
+
 
 # Load the trained model
-model = load_model('C:/Users/Kasia/Desktop/dl_fun/my_model.h5')  # replace with your saved model
+model = load_model('C:/Users/Kasia/Desktop/dl_fun/my_model2.h5')  # replace with your saved model
+
+if model is None:
+    st.write('Failed to load the model')
 
 st.title('Music Genre Prediction from Album Covers')
 
@@ -57,15 +67,41 @@ for i in range(0, 16, 4):  # Change the step size to adjust the number of images
 
 uploaded_file = st.file_uploader("Choose an album cover image...", type=['png', 'jpg'])
 
-
 images = np.array(img_lst) / 255.0 #normalization
 labels = to_categorical(labels)  #one hot encoding
 x_train, x_test, y_train, y_test = train_test_split(images, labels, test_size=0.4, random_state=27)
 y_pred = model.predict(x_test)
 
-
+# Get the actual labels (instead of one-hot encoding) for y_test and y_pred
 y_test_labels = np.argmax(y_test, axis=1)
 y_pred_labels = np.argmax(y_pred, axis=1)
+
+
+### PRED OF THE NEW IMAGE
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption='Uploaded Image.', use_column_width=True)
+    
+    # Preprocess the image
+    image = preprocess_image(image)
+    
+    
+    st.write("Predicting...")
+    prediction = model.predict(image)
+
+    # Use softmax to get the scores
+    score = tf.nn.softmax(prediction[0])
+
+    categories = ['disco', 'electro', 'folk', 'rap', 'rock'] 
+
+    # Get the name of the predicted class and the confidence score
+    predicted_genre = categories[np.argmax(score)]
+    confidence_score = 100 * np.max(score)
+
+    st.write(
+        "This image most likely belongs to {} with a {:.2f} percent confidence."
+        .format(predicted_genre, confidence_score)
+    )
 
 # Display 15 random images from the test set with their labels
 random_indices = np.random.choice(x_test.shape[0], size=15, replace=False)
@@ -87,27 +123,36 @@ for i in range(0, 15, 3):  # Change the step size to adjust the number of images
 
         cols[j].image(img, width=100)  
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Image.', use_column_width=True)
-    
-    # Preprocess the image
-    image = preprocess_image(image)
-    
-    # Make the prediction
-    st.write("Predicting...")
-    prediction = model.predict(image)
 
-    categories = ['disco', 'electro', 'folk', 'rap', 'rock'] 
+# Classification report
+st.write('## Classification Report')
+report = classification_report(y_test_labels, y_pred_labels, target_names=categories, output_dict=True)
+report_df = pd.DataFrame(report).transpose()
+st.dataframe(report_df)
 
-    # Create a dictionary mapping genre names to prediction scores
-    score_dict = {cat: score for cat, score in zip(categories, prediction)}
-    st.write(f"Raw prediction scores: {score_dict}")
+from contextlib import redirect_stdout
+import io
+
+# SUMMARY - uwaga jest super duze, jak Twojego modelu tez takie bedzie to niekoniecznie musimy zostawiac
+#Zostawiam dwie propozycje, krotsza i dluzsza 
+
+trainable_params = np.sum([np.prod(v.get_shape()) for v in model.trainable_variables])
+st.write(f"Trainable params: {trainable_params}")
+
+non_trainable_params = np.sum([np.prod(v.get_shape()) for v in model.non_trainable_variables])
+st.write(f"Non-trainable params: {non_trainable_params}")
+
+total_params = trainable_params + non_trainable_params
+st.write(f"Total params: {total_params}")
 
 
-    # Use argmax to find the index of the most likely prediction
-    predicted_index = np.argmax(prediction, axis=1)
-    predicted_genre = categories[predicted_index[0]]
+#Dluzsza 
+stream = io.StringIO()
+with redirect_stdout(stream):
+    model.summary()
+summary_string = stream.getvalue()
+stream.close()
 
-    st.write(f"Predicted genre: {predicted_genre}")
-    
+st.write('## Model Summary')
+st.text(summary_string)
+
