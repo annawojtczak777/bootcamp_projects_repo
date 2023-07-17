@@ -1,4 +1,4 @@
-## The 1th Scrum SQL project  
+## The 1st Scrum SQL project  
 
 ### Does geographic location affect the number of accidents in the USA?
 
