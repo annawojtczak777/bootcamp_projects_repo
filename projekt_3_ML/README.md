@@ -7,5 +7,7 @@
 
 - app with summary and conclusions 
 [streamlit/app.py](https://github.com/annawojtczak777/bootcamp_projects_repo/blob/main/projekt_3_ML/streamlit/app.py)
+Note: to view this Streamlit app on a browser, run in terminal with the following command:
+*streamlit run YOUR PATH TO APP FILE*
 
 - data source - Kaggle:  [Temperature change](https://www.kaggle.com/datasets/sevgisarac/temperature-change)
