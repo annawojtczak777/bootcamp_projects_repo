@@ -3,7 +3,6 @@
 ###   App Music Genres Prediction from Album Covers
 
 - image classification, data augmentation, transfer learning, visualize the data, model evaluation, predict on new data:  Python, Tensorflow, Scikit-learn, cv2, Streamlit, pandas, Numpy, Matplotlib, Seaborn
-
 [model_EfficientNetB1.ipynb](https://github.com/annawojtczak777/bootcamp_projects_repo/blob/main/projekt_4_DL/model_EfficientNetB1.ipynb)
 
 - app with summary and conclusions 
